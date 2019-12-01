@@ -38,6 +38,8 @@ displayedSheet = vegetation
 section = "outside"
 
 dragTiles = {}
+paintTile = {}
+paintmode = false
 dragging = 0
 scroll = 0
 saving = false
@@ -61,13 +63,24 @@ function love.update(dt)
   if saving or loading then
   else
     if love.mouse.isDown(1) then
-      if dragging == 0 and love.mouse.getX() < 260 then
+      if love.keyboard.isDown("lshift") and love.mouse.getX() < 260 then
         rx = roundDown(love.mouse.getX())
         ry = roundDown(love.mouse.getY())
-        
-        dragging = (rx/32)+((ry/32)*8)
-        
-        dragTiles[#dragTiles+1] = {0, 0, rx, ry-scroll, getSheetString()}
+        paintTile = {rx, ry-scroll, getSheetString()}
+        paintmode = true
+      elseif paintmode and love.mouse.getX() > 260  then
+        rx = roundDown(love.mouse.getX())
+        ry = roundDown(love.mouse.getY())
+        dragTiles[#dragTiles+1] = {rx, ry, paintTile[1], paintTile[2], paintTile[3]}
+      else
+        if dragging == 0 and paintmode == false and love.mouse.getX() < 260 then
+          rx = roundDown(love.mouse.getX())
+          ry = roundDown(love.mouse.getY())
+          
+          dragging = (rx/32)+((ry/32)*8)
+          
+          dragTiles[#dragTiles+1] = {0, 0, rx, ry-scroll, getSheetString()}
+        end
       end
     else
       if dragging > 0 then
@@ -207,6 +220,7 @@ function love.draw()
       love.graphics.draw(img, quad, dragTiles[i][1], dragTiles[i][2]) 
     end
   end
+  
   love.graphics.setColor(0.8,0.8,0.8)
   love.graphics.rectangle("fill", 0, 0, 256, 1000 )
   
