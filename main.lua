@@ -12,6 +12,9 @@ electronics = love.graphics.newImage("assets/interiorgeneral/electronics.png")
 tables = love.graphics.newImage("assets/interiorgeneral/tables.png")
 otheri = love.graphics.newImage("assets/interiorgeneral/other.png")
 
+loadsaveback = love.graphics.newImage("assets/saveload.png")
+painttilebox = love.graphics.newImage("assets/painttile.png")
+
 back = love.graphics.newImage("assets/background.png")
 backx = -104
 backy = -104
@@ -40,8 +43,10 @@ section = "outside"
 dragTiles = {}
 paintTile = {}
 paintmode = false
+layermode = "top"
 dragging = 0
 scroll = 0
+shift = 0
 saving = false
 loading = false
 saveinput = ""
@@ -50,6 +55,7 @@ loadinput = 1
 function love.load()
   love.window.setMode(1300, 1000)
   love.graphics.setBackgroundColor(1,1,1)
+  files = dirLookup("projects")
 end
 
 function roundDown(n)
@@ -63,7 +69,7 @@ function love.update(dt)
   if saving or loading then
   else
     if love.mouse.isDown(1) then
-      if love.keyboard.isDown("lshift") and love.mouse.getX() < 260 then
+      if paintmode and love.mouse.getX() < 260 then
         rx = roundDown(love.mouse.getX())
         ry = roundDown(love.mouse.getY())
         paintTile = {rx, ry-scroll, getSheetString()}
@@ -71,7 +77,10 @@ function love.update(dt)
       elseif paintmode and love.mouse.getX() > 260  then
         rx = roundDown(love.mouse.getX())
         ry = roundDown(love.mouse.getY())
-        dragTiles[#dragTiles+1] = {rx, ry, paintTile[1], paintTile[2], paintTile[3]}
+        if layermode == "top" then dragTiles[#dragTiles+1] = {rx, ry, paintTile[1], paintTile[2], paintTile[3], 1} end
+        if layermode == "bot" then dragTiles[#dragTiles+1] = {rx, ry, paintTile[1], paintTile[2], paintTile[3], 0} end
+        
+        --dragTiles = sortByZIndex(dragTiles)
       else
         if dragging == 0 and paintmode == false and love.mouse.getX() < 260 then
           rx = roundDown(love.mouse.getX())
@@ -79,14 +88,28 @@ function love.update(dt)
           
           dragging = (rx/32)+((ry/32)*8)
           
-          dragTiles[#dragTiles+1] = {0, 0, rx, ry-scroll, getSheetString()}
-        end
+          if layermode == "top" then dragTiles[#dragTiles+1] = {0, 0, rx, ry-scroll, getSheetString(), 1} end
+          if layermode == "bot" then dragTiles[#dragTiles+1] = {0, 0, rx, ry-scroll, getSheetString(), 0} end
+          for i=1,#dragTiles do
+            for a=1,#dragTiles[i] do
+              io.write(dragTiles[i][a].." ")
+            end
+            print("")
+          end
+          --dragTiles = sortByZIndex(dragTiles)
+          for i=1,#dragTiles do
+            for a=1,#dragTiles[i] do
+              io.write(dragTiles[i][a].." ")
+            end
+            print("")
+          end
+        end 
       end
     else
       if dragging > 0 then
         if love.mouse.getX() < 260 then 
           dragging = 0
-          dragTiles[#dragTiles] = nil
+          table.remove(dragTiles, #dragTiles)
           return
         end
         lx = roundDown(love.mouse.getX())
@@ -202,9 +225,13 @@ function love.draw()
     love.graphics.print( "7 - Other", 1200, 130)
   end
   
-  love.graphics.setColor(1,1,1)
+  love.graphics.setColor(0.8,0.8,0.8)
+  love.graphics.rectangle("fill", 0, 0, 256, 1000 )
   
-  for i=1,#dragTiles do
+  love.graphics.setColor(1,1,1)
+  love.graphics.draw(displayedSheet, 0, 0+scroll)
+  
+   for i=1,#dragTiles do
     if dragTiles[i] == nil then 
     else
       img = spriteSheets[dragTiles[i][5]]
@@ -213,36 +240,62 @@ function love.draw()
     end
   end
   
-  love.graphics.setColor(0.8,0.8,0.8)
-  love.graphics.rectangle("fill", 0, 0, 256, 1000 )
-  
-  love.graphics.setColor(1,1,1)
-  love.graphics.draw(displayedSheet, 0, 0+scroll)
-  
   if saving == true then
-    love.graphics.rectangle("fill", 350, 200, 300, 100)
+    love.graphics.draw(loadsaveback, 350, 200)
     love.graphics.setColor(0,0,0)
-    love.graphics.print(saveinput, 360, 210)
+    love.graphics.print(">> "..saveinput..".proj", 380, 230)
     love.graphics.setColor(1,1,1)
   end
+  
   if loading == true then
-    love.graphics.rectangle("fill", 350, 200, 300, 100)
-    print(input)
+    love.graphics.draw(loadsaveback, 350, 200)
     love.graphics.setColor(0,0,0)
-    files = dirLookup("projects")
+    
+    count = 0
+   
     for i=1,#files do
-      if loadinput == i then love.graphics.print(">"..files[i], 360, 210+(10*i))
-      else love.graphics.print(" "..files[i], 360, 210+(10*i))
+      if i >= shift and count <= 5 then
+        if loadinput == i then 
+          love.graphics.print(">"..files[i], 380, 220+(10*count))
+          count = count + 1
+        else
+          love.graphics.print(" "..files[i], 380, 220+(10*count))
+          count = count + 1
+        end
       end
     end
+    
     love.graphics.print(saveinput, 360, 210)
   end
+  
   width, height = love.graphics.getDimensions( )
   love.graphics.setColor(0,0.5,0.5)
-  love.graphics.rectangle("fill", 0, 900, 256, 100)
-  love.graphics.setColor(0,0,0)
-  love.graphics.print("Help - h", 10, 910)
+  love.graphics.rectangle("fill", 0, 920, 256, 80)
+  love.graphics.draw(painttilebox, 256-80, 920, 0, 2, 2)
   love.graphics.setColor(1,1,1)
+  
+  if paintmode and paintTile[1] ~= nil then
+    img = spriteSheets[paintTile[3]]
+    quad = love.graphics.newQuad(paintTile[1], paintTile[2], 32, 32, img)
+    love.graphics.draw(img, quad, 256-80+8, 920+8, 0, 2, 2)
+  end
+  
+  love.graphics.setColor(0.9,0.9,0.9)
+  love.graphics.rectangle("fill", 10, 932, 40, 25)
+  love.graphics.rectangle("fill", 10, 962, 80, 25)
+  love.graphics.rectangle("fill", 55, 932, 115, 25)
+  love.graphics.setColor(0,0,0)
+  love.graphics.print("Help", 15, 938)
+  love.graphics.print("Paint Mode", 15, 968)
+  love.graphics.print("Layer Mode - "..layermode, 59, 938)
+  love.graphics.setColor(1,1,1)
+end
+
+function table.empty (self)
+    for _, _ in pairs(self) do
+        return false
+    end
+    return true
 end
 
 function love.wheelmoved(x, y)
@@ -255,12 +308,42 @@ function love.wheelmoved(x, y)
 end
 
 function dirLookup(dir)
-  files = {}
-  p = io.popen('find "'..dir..'" -type f')       
-  for file in p:lines() do                         
+  files = {}      
+  for file in io.popen('find "'..dir..'" -type f'):lines() do                         
     files[#files+1] = file
   end
   return files
+end
+
+--function sortByZIndex(table)
+--  tmptable = {}
+--  print("sort"..#table)
+--  for i=1,#table do
+--    print("awd"..table[i][5])
+--    if table[i][6] == 0 then
+--      tmptable[#tmptable+1] = table[i]
+--    end
+--  end
+--  for i=1,#table do
+--    if table[i][6] == 1 then
+--      tmptable[#tmptable+1] = table[i]
+--    end
+--  end
+--  print(#tmptable)
+--  return tmptable
+--end
+
+function love.mousepressed(x, y, button, istouch)
+   if button == 1 then
+      if x > 10 and x < 90 and y > 962 and y < 987 then
+        if paintmode then paintmode = false
+        else paintmode = true end
+      end
+      if x > 55 and x < 170 and y > 932 and y < 957 then
+        if layermode == "bot" then layermode = "top"
+        else layermode = "bot" end
+      end
+   end
 end
 
 function love.keypressed(key, code)
@@ -274,8 +357,10 @@ function love.keypressed(key, code)
     files = dirLookup("projects")
     if key == "up" and loadinput ~= 1 then
       loadinput = loadinput - 1
-    elseif key == "down" and loadinput ~= #files then
+      if loadinput > 5 then shift = shift - 1 end
+    elseif key == "down" and loadinput < #files then
       loadinput = loadinput + 1
+      if loadinput > 5 then shift = shift + 1 end
     end
   else
     if key == "escape" then
