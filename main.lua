@@ -136,29 +136,25 @@ function love.update(dt)
       dragTiles[#dragTiles][2] = love.mouse.getY()-16
     end
     
-    if love.keyboard.isDown("down") and backy+2000 > 500 then
-      backy = backy - 32
+    if love.keyboard.isDown("down") then
       for i=1,#dragTiles do
         if dragTiles[i] == nil then 
         else dragTiles[i][2] = dragTiles[i][2] - 32 end
       end
     end
-    if love.keyboard.isDown("right") and backx+2000 > 650 then
-      backx = backx - 32
+    if love.keyboard.isDown("right") then
       for i=1,#dragTiles do
         if dragTiles[i] == nil then 
         else dragTiles[i][1] = dragTiles[i][1] - 32 end
       end
     end
-    if love.keyboard.isDown("left") and backx < 650 then
-      backx = backx + 32
+    if love.keyboard.isDown("left") then
       for i=1,#dragTiles do
         if dragTiles[i] == nil then 
         else dragTiles[i][1] = dragTiles[i][1] + 32 end
       end
     end
-    if love.keyboard.isDown("up") and backy < 500 then
-      backy = backy + 32
+    if love.keyboard.isDown("up") then
       for i=1,#dragTiles do
         if dragTiles[i] == nil then 
         else dragTiles[i][2] = dragTiles[i][2] + 32 end
@@ -225,13 +221,9 @@ function love.draw()
     love.graphics.print( "7 - Other", 1200, 130)
   end
   
-  love.graphics.setColor(0.8,0.8,0.8)
-  love.graphics.rectangle("fill", 0, 0, 256, 1000 )
-  
   love.graphics.setColor(1,1,1)
-  love.graphics.draw(displayedSheet, 0, 0+scroll)
   
-   for i=1,#dragTiles do
+  for i=1,#dragTiles do
     if dragTiles[i] == nil then 
     else
       img = spriteSheets[dragTiles[i][5]]
@@ -239,6 +231,15 @@ function love.draw()
       love.graphics.draw(img, quad, dragTiles[i][1], dragTiles[i][2]) 
     end
   end
+  
+  love.graphics.setColor(0.8,0.8,0.8)
+  love.graphics.rectangle("fill", 0, 0, 256, 1000 )
+  
+  
+  love.graphics.setColor(1,1,1)
+  love.graphics.draw(displayedSheet, 0, 0+scroll)
+  
+   
   
   if saving == true then
     love.graphics.draw(loadsaveback, 350, 200)
