@@ -117,36 +117,28 @@ function love.update(dt)
       backy = backy - 32
       for i=1,#dragTiles do
         if dragTiles[i] == nil then 
-        else
-          dragTiles[i][2] = dragTiles[i][2] - 32
-        end
+        else dragTiles[i][2] = dragTiles[i][2] - 32 end
       end
     end
     if love.keyboard.isDown("right") and backx+2000 > 650 then
       backx = backx - 32
       for i=1,#dragTiles do
         if dragTiles[i] == nil then 
-        else
-          dragTiles[i][1] = dragTiles[i][1] - 32
-        end
+        else dragTiles[i][1] = dragTiles[i][1] - 32 end
       end
     end
     if love.keyboard.isDown("left") and backx < 650 then
       backx = backx + 32
       for i=1,#dragTiles do
         if dragTiles[i] == nil then 
-        else
-          dragTiles[i][1] = dragTiles[i][1] + 32
-        end
+        else dragTiles[i][1] = dragTiles[i][1] + 32 end
       end
     end
     if love.keyboard.isDown("up") and backy < 500 then
       backy = backy + 32
       for i=1,#dragTiles do
         if dragTiles[i] == nil then 
-        else
-          dragTiles[i][2] = dragTiles[i][2] + 32
-        end
+        else dragTiles[i][2] = dragTiles[i][2] + 32 end
       end
     end
   end
@@ -244,8 +236,13 @@ function love.draw()
       end
     end
     love.graphics.print(saveinput, 360, 210)
-    love.graphics.setColor(1,1,1)
   end
+  width, height = love.graphics.getDimensions( )
+  love.graphics.setColor(0,0.5,0.5)
+  love.graphics.rectangle("fill", 0, 900, 256, 100)
+  love.graphics.setColor(0,0,0)
+  love.graphics.print("Help - h", 10, 910)
+  love.graphics.setColor(1,1,1)
 end
 
 function love.wheelmoved(x, y)
