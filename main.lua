@@ -15,8 +15,8 @@ function love.load()
 end
 
 function love.update(dt)
-	if scene == "home" then home.update() end
-	if scene == "editor" then editor.update() end
+	if scene == "home" then home.update(dt) end
+	if scene == "editor" then editor.update(dt) end
 end
 
 function love.draw() 

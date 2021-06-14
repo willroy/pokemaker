@@ -23,17 +23,17 @@ local yMovement = 0
 local xMovement = 0
 
 local function screenMovement()
-    if love.keyboard.isDown("w") then yMovement = yMovement - 32 end
-    if love.keyboard.isDown("a") then xMovement = xMovement - 32 end
-    if love.keyboard.isDown("s") then yMovement = yMovement + 32 end
-    if love.keyboard.isDown("d") then xMovement = xMovement + 32 end
+    if love.keyboard.isDown("w") then yMovement = yMovement + 32 end
+    if love.keyboard.isDown("a") then xMovement = xMovement + 32 end
+    if love.keyboard.isDown("s") then yMovement = yMovement - 32 end
+    if love.keyboard.isDown("d") then xMovement = xMovement - 32 end
 end
 
 function editor.load() 
   	love.window.setTitle("Pokemaker - Editor - "..love.filesystem.getWorkingDirectory().."/projects/"..loadedFile)
 end
 
-function editor.update()
+function editor.update(dt)
 	screenMovement()
 end
 

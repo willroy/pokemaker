@@ -32,16 +32,18 @@ local misc = love.graphics.newImage("assets/interiorgeneral/misc.png")
 local electronics = love.graphics.newImage("assets/interiorgeneral/electronics.png")
 local tables = love.graphics.newImage("assets/interiorgeneral/tables.png")
 local otheri = love.graphics.newImage("assets/interiorgeneral/other.png")
+local video = love.graphics.newVideo("assets/prank.ogv")
 
 local spriteSheets = {["vegetation"] = vegetation, ["groundtiles"] = groundtiles, ["rocks"] = rocks, ["items"] = items, ["othero"] = othero, ["buildings"] = buildings, ["walls"] = walls, ["flooring"] = flooring, ["stairs"] = stairs, ["misc"] = misc, ["electronics"] = electronics, ["tables"] = tables, ["otheri"] = otheri}
 
 local files = dirLookup(love.filesystem.getWorkingDirectory().."/projects/")
 
 local dragTiles
-local displayNum = 0;
+local displayNum = 0
 
-function home.update()
+love.audio.setVolume(0.1)
 
+function home.update(dt)
 end
 
 function home.draw() 
@@ -113,6 +115,9 @@ function home.mousepressed(x, y, button, istouch)
 		loadedDragTiles = dragTiles
 		editor.load() 
 		scene = "editor"
+	end
+	if x > 1161 and x < 1258 and y > 51 and y < 135 then
+		video:play()
 	end
 end
 
