@@ -1,7 +1,21 @@
+local function splitString(inpstr) 
+    local list = {}
+    for str in string.gmatch(inpstr, "%S+") do
+        table.insert(list, str)
+    end
+    return list
+end
+
 local function dirLookup(dir)
 	files = {}      
-	for file in io.popen([[dir "]]..dir..[[" /b]]):lines() do                         
-		files[#files+1] = file
+	for file in io.popen([[dir "]]..dir..[[" /b]]):lines() do
+        if (#splitString(file) > 0) then
+            for i = 1, #splitString(file), 1 do
+               files[#files+1] = splitString(file)[i] 
+            end
+        else
+            files[#files+1] = file
+        end
 	end
 	return files
 end
@@ -47,7 +61,7 @@ function home.update(dt)
 end
 
 function home.draw() 
-    love.graphics.setColor(1, 1, 1)
+  love.graphics.setColor(1, 1, 1)
 
 	love.graphics.draw(background, 0, 0)
 	x, y = love.mouse.getPosition()
@@ -79,11 +93,11 @@ function home.draw()
 				    end
 				    dragTiles = tmp
 		    	end
-			else 
-				love.graphics.draw(buttons, FileNotPressed, 75, 290+(31*count))
-				love.graphics.setColor(0, 0, 0)
-		    	love.graphics.print(files[i], 75, 300+(31*count))
-			end
+			  else 
+          love.graphics.draw(buttons, FileNotPressed, 75, 290+(31*count))
+          love.graphics.setColor(0, 0, 0)
+          love.graphics.print(files[i], 75, 300+(31*count))
+        end
 	    	
 		    love.graphics.setColor(1, 1, 1)
 		    count = count + 1

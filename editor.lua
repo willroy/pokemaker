@@ -22,6 +22,9 @@ local scale = 1
 local yMovement = 0
 local xMovement = 0
 
+local currentSpriteSheet = spriteSheets["groundtiles"]
+local spriteSheetScroll = 0
+
 local function screenMovement()
     if love.keyboard.isDown("w") then yMovement = yMovement + 32 end
     if love.keyboard.isDown("a") then xMovement = xMovement + 32 end
@@ -49,10 +52,15 @@ function editor.draw()
 		    end
 		end
 	end
+    
+    love.graphics.draw(currentSpriteSheet, 10, 10+spriteSheetScroll)
 end
 
 function editor.mousepressed(x, y, button, istouch) 
-
+    --spritesheet interaction
+    if x < 255 then
+        
+    end
 end
 
 function editor.keypressed(key, code) 
@@ -64,18 +72,27 @@ function editor.keypressed(key, code)
 end
 
 function editor.wheelmoved(x, y)
-	if y > 0 then
-		if scale == 2 then scale = 4 end
-		if scale == 1 then scale = 2 end
-		if scale == 0.5 then scale = 1 end
-		if scale == 0.25 then scale = 0.5 end
-	end
-	if y < 0 then
-		if scale == 0.5 then scale = 0.25 end
-		if scale == 1 then scale = 0.5 end
-		if scale == 2 then scale = 1 end
-		if scale == 4 then scale = 2 end
-	end
+    if love.mouse.getX() > 255 then
+        if y > 0 then
+            if scale == 2 then scale = 4 end
+            if scale == 1 then scale = 2 end
+            if scale == 0.5 then scale = 1 end
+            if scale == 0.25 then scale = 0.5 end
+        end
+        if y < 0 then
+            if scale == 0.5 then scale = 0.25 end
+            if scale == 1 then scale = 0.5 end
+            if scale == 2 then scale = 1 end
+            if scale == 4 then scale = 2 end
+        end
+    else
+        if y > 0 then
+            spriteSheetScroll = spriteSheetScroll + 32
+        end
+        if y < 0 then
+            spriteSheetScroll = spriteSheetScroll - 32
+        end
+    end
 end
 
 return editor
