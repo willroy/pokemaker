@@ -1,3 +1,10 @@
+local function roundDown(n)
+  for i=0,32 do
+    if n % 32 == 0 then return n end
+    n = n - 1
+  end
+end
+
 local editor = {}
 
 local vegetation = love.graphics.newImage("assets/outside/vegetation.png")
@@ -22,8 +29,12 @@ local scale = 1
 local yMovement = 0
 local xMovement = 0
 
-local currentSpriteSheet = spriteSheets["groundtiles"]
+local currentSpriteSheet = "groundtiles"
 local spriteSheetScroll = 0
+local selectedTile
+
+local mouseX = 0
+local mouseY = 0
 
 local function screenMovement()
     if love.keyboard.isDown("w") then yMovement = yMovement + 32 end
@@ -48,18 +59,24 @@ function editor.draw()
 		    if loadedDragTiles[i] ~= nil then
 				local img = spriteSheets[loadedDragTiles[i][5]]
 				local quad = love.graphics.newQuad(loadedDragTiles[i][3], loadedDragTiles[i][4], 32, 32, img)
-				love.graphics.draw(img, quad, (xMovement+loadedDragTiles[i][1])*scale, (yMovement+loadedDragTiles[i][2])*scale, 0, scale, scale) 
+				love.graphics.draw(img, quad, ((xMovement+loadedDragTiles[i][1])*scale)+mouseX, ((yMovement+loadedDragTiles[i][2])*scale)+mouseY, 0, scale, scale) 
 		    end
 		end
 	end
     
-    love.graphics.draw(currentSpriteSheet, 10, 10+spriteSheetScroll)
+    if selectedTile ~= nil then
+        local img = spriteSheets[selectedTile[3]]
+        local quad = love.graphics.newQuad(selectedTile[1], selectedTile[2], 32, 32, img)
+        love.graphics.draw(img, quad, 1236, 936, 0, 2, 2) 
+    end
+    
+    love.graphics.draw(spriteSheets[currentSpriteSheet], 10, 10+spriteSheetScroll)
 end
 
 function editor.mousepressed(x, y, button, istouch) 
     --spritesheet interaction
-    if x < 255 then
-        
+    if roundDown(x) < 255 then
+        selectedTile = {roundDown(x), roundDown(y), currentSpriteSheet}
     end
 end
 
@@ -73,6 +90,7 @@ end
 
 function editor.wheelmoved(x, y)
     if love.mouse.getX() > 255 then
+        mouseX, mouseY = love.mouse.getPosition()
         if y > 0 then
             if scale == 2 then scale = 4 end
             if scale == 1 then scale = 2 end

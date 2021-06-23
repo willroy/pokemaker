@@ -17,7 +17,13 @@ local function dirLookup(dir)
             files[#files+1] = file
         end
 	end
-	return files
+    filesSantised = {}
+    for i=1,#files do
+       if ( string.sub(files[i], -5) == ".proj" ) then
+            filesSantised[#filesSantised+1] = files[i]
+       end
+    end
+	return filesSantised
 end
 
 local function previewMask()
