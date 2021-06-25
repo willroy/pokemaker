@@ -1,7 +1,8 @@
 Version 3.1 of Pokemaker
 
-Pokemaker is an app designed to aid development of my pokemon game that it is in development.
-It will include the following features, that will be used for the game to allow interaction with a world:
+Pokemaker is an app designed to aid development of my pokemon game.
+
+It will include the following features, that will be used in the game to allow user world interaction:
  
 Map visual design; 
 Z-Index mapping;
