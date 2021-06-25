@@ -12,6 +12,7 @@ function love.load()
 	love.window.setMode(1300, 1000)
   	love.graphics.setBackgroundColor(1,1,1)
   	love.window.setIcon(icon);
+  	io.stdout:setvbuf("no")
 end
 
 function love.update(dt)

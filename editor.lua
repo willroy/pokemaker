@@ -48,6 +48,19 @@ function editor.load()
 end
 
 function editor.update(dt)
+	x, y = love.mouse.getPosition()
+	if love.mouse.isDown(1) and roundDown(x) > 255 then
+		loadedDragTiles[#loadedDragTiles+1] = {roundDown(x-xMovement), roundDown(y-yMovement), selectedTile[1], selectedTile[2], selectedTile[3]}
+	end
+	if love.mouse.isDown(2) then
+		for i=1,#loadedDragTiles do
+			if loadedDragTiles[i] ~= nil then
+				if loadedDragTiles[i][1] == roundDown(x-xMovement) and loadedDragTiles[i][2] == roundDown(y-yMovement) then
+				  	table.remove(loadedDragTiles, i)
+				end
+			end
+		end
+	end
 	screenMovement()
 end
 
@@ -70,13 +83,12 @@ function editor.draw()
         love.graphics.draw(img, quad, 1236, 936, 0, 2, 2) 
     end
     
-    love.graphics.draw(spriteSheets[currentSpriteSheet], 10, 10+spriteSheetScroll)
+    love.graphics.draw(spriteSheets[currentSpriteSheet], 0, 0+spriteSheetScroll)
 end
 
 function editor.mousepressed(x, y, button, istouch) 
-    --spritesheet interaction
     if roundDown(x) < 255 then
-        selectedTile = {roundDown(x), roundDown(y), currentSpriteSheet}
+        selectedTile = {roundDown(x), roundDown(y-spriteSheetScroll), currentSpriteSheet}
     end
 end
 
@@ -86,6 +98,33 @@ function editor.keypressed(key, code)
 		yMovement = 0 
 		xMovement = 0 
 	end
+	if key == "x" then
+		stream = io.open(love.filesystem.getWorkingDirectory().."/projects/"..loadedFile, "w")
+		for i=1,#loadedDragTiles do
+	        if loadedDragTiles[i] == nil then 
+	        else
+	          stream:write(loadedDragTiles[i][1], " ") 
+	          stream:write(loadedDragTiles[i][2], " ") 
+	          stream:write(loadedDragTiles[i][3], " ") 
+	          stream:write(loadedDragTiles[i][4], " ") 
+	          stream:write(loadedDragTiles[i][5], "\n") 
+	        end
+      	end
+      	stream.close()
+	end
+	if key == "1" then currentSpriteSheet="vegetation" end
+	if key == "2" then currentSpriteSheet="groundtiles" end
+	if key == "3" then currentSpriteSheet="rocks" end
+	if key == "4" then currentSpriteSheet="items" end
+	if key == "5" then currentSpriteSheet="othero" end
+	if key == "6" then currentSpriteSheet="buildings" end
+	if key == "7" then currentSpriteSheet="walls" end
+	if key == "8" then currentSpriteSheet="flooring" end
+	if key == "9" then currentSpriteSheet="stairs" end
+	if key == "0" then currentSpriteSheet="misc" end
+	if key == "i" then currentSpriteSheet="electronics" end
+	if key == "o" then currentSpriteSheet="tables" end 
+	if key == "p" then currentSpriteSheet="otheri" end
 end
 
 function editor.wheelmoved(x, y)
