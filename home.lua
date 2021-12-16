@@ -7,23 +7,23 @@ local function splitString(inpstr)
 end
 
 local function dirLookup(dir)
-	files = {}      
+	projects = {}      
 	for file in io.popen([[dir "]]..dir..[[" /b]]):lines() do
         if (#splitString(file) > 0) then
             for i = 1, #splitString(file), 1 do
-               files[#files+1] = splitString(file)[i] 
+               projects[#projects+1] = splitString(file)[i] 
             end
         else
-            files[#files+1] = file
+            projects[#projects+1] = file
         end
 	end
-    filesSantised = {}
-    for i=1,#files do
-       if ( string.sub(files[i], -5) == ".proj" ) then
-            filesSantised[#filesSantised+1] = files[i]
+    projectsSantised = {}
+    for i=1,#projects do
+       if ( string.sub(projects[i], -5) == ".proj" ) then
+            projectsSantised[#projectsSantised+1] = projects[i]
        end
     end
-	return filesSantised
+	return projects
 end
 
 local function previewMask()
@@ -56,7 +56,7 @@ local video = love.graphics.newVideo("assets/prank.ogv")
 
 local spriteSheets = {["vegetation"] = vegetation, ["groundtiles"] = groundtiles, ["rocks"] = rocks, ["items"] = items, ["othero"] = othero, ["buildings"] = buildings, ["walls"] = walls, ["flooring"] = flooring, ["stairs"] = stairs, ["misc"] = misc, ["electronics"] = electronics, ["tables"] = tables, ["otheri"] = otheri}
 
-local files = dirLookup(love.filesystem.getWorkingDirectory().."/projects/")
+local projects = dirLookup(love.filesystem.getWorkingDirectory().."/projects/")
 
 local dragTiles
 local displayNum = 0
@@ -79,18 +79,18 @@ function home.draw()
     local tmpHover = 0
 
 
-    if #files > 0 then
-	    for i=1,#files do
+    if #projects > 0 then
+	    for i=1,#projects do
 	    	if x > 75 and x < 210 and y > 292+(31*count) and y < 323+(31*count) then
 	    		hasHover = true
 	    		tmpHover = count+1
 	    		love.graphics.draw(buttons, FilePressed, 75, 290+(31*count))
 	    		love.graphics.setColor(0, 0, 0)
-		    	love.graphics.print(files[i], 75, 302+(31*count))
+		    	love.graphics.print(projects[i], 75, 302+(31*count))
 		    	if displayNum == 0 then
 		    		displayNum = count+1
 		    		local tmp = {}
-				    for line in io.lines(love.filesystem.getWorkingDirectory().."/projects/"..files[count+1]) do
+				    for line in io.lines(love.filesystem.getWorkingDirectory().."/projects/"..projects[count+1].."/"..projects[count+1].."Tiles.proj") do
 				    	item = {}
 						for substring in line:gmatch("%S+") do
 							table.insert(item, substring)
@@ -102,7 +102,7 @@ function home.draw()
 			  else 
           love.graphics.draw(buttons, FileNotPressed, 75, 290+(31*count))
           love.graphics.setColor(0, 0, 0)
-          love.graphics.print(files[i], 75, 300+(31*count))
+          love.graphics.print(projects[i], 75, 300+(31*count))
         end
 	    	
 		    love.graphics.setColor(1, 1, 1)
@@ -131,7 +131,14 @@ end
 
 function home.mousepressed(x, y, button, istouch) 
 	if displayNum ~= 0 then
-		loadedFile = files[displayNum]
+		print(projects[displayNum])
+		local stringsplit = {}
+		for i in projects[displayNum]:gsub("%f[.]%.%f[^.]", "\0"):gmatch"%Z+" do
+			stringsplit[#stringsplit+1] = i
+		end
+		local name = stringsplit[1]
+		loadedFileTiles = name.."/"..name.."Tiles"..".proj"
+		loadedFileColli = name.."/"..name.."Colli"..".proj"
 		loadedDragTiles = dragTiles
 		editor.load() 
 		scene = "editor"

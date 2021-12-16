@@ -2,7 +2,8 @@ home = require("home")
 editor = require("editor")
 
 scene = "home"
-loadedFile = nil
+loadedFileTiles = nil
+loadedFileColli = nil
 loadedDragTiles = nil
 
 local icon = love.image.newImageData("assets/icon.png");

@@ -23,7 +23,11 @@ local otheri = love.graphics.newImage("assets/interiorgeneral/other.png")
 
 local spriteSheets = {["vegetation"] = vegetation, ["groundtiles"] = groundtiles, ["rocks"] = rocks, ["items"] = items, ["othero"] = othero, ["buildings"] = buildings, ["walls"] = walls, ["flooring"] = flooring, ["stairs"] = stairs, ["misc"] = misc, ["electronics"] = electronics, ["tables"] = tables, ["otheri"] = otheri}
 
-back = love.graphics.newImage("assets/background.png")
+local back = love.graphics.newImage("assets/background.png")
+local grid = love.graphics.newImage("assets/grid.png")
+local buttonsSheet = love.graphics.newImage("assets/editorbuttons.png")
+buttons = {{love.graphics.newQuad(0, 0, 32, 32, buttonsSheet:getDimensions()), love.graphics.newQuad(0, 0, 152, 32, buttonsSheet:getDimensions())}, 
+		   {love.graphics.newQuad(0, 32, 32, 32, buttonsSheet:getDimensions()), love.graphics.newQuad(0, 32, 152, 32, buttonsSheet:getDimensions())}}
 
 local scale = 1
 local yMovement = 0
@@ -36,6 +40,8 @@ local selectedTile
 local mouseX = 0
 local mouseY = 0
 
+local addingCollision = false
+
 local function screenMovement()
     if love.keyboard.isDown("w") then yMovement = yMovement + 32 end
     if love.keyboard.isDown("a") then xMovement = xMovement + 32 end
@@ -44,19 +50,21 @@ local function screenMovement()
 end
 
 function editor.load() 
-  	love.window.setTitle("Pokemaker - Editor - "..love.filesystem.getWorkingDirectory().."/projects/"..loadedFile)
+  	love.window.setTitle("Pokemaker - Editor - "..love.filesystem.getWorkingDirectory().."/projects/"..loadedFileTiles)
 end
 
 function editor.update(dt)
 	x, y = love.mouse.getPosition()
-	if love.mouse.isDown(1) and roundDown(x) > 255 then
-		loadedDragTiles[#loadedDragTiles+1] = {roundDown(x-xMovement), roundDown(y-yMovement), selectedTile[1], selectedTile[2], selectedTile[3]}
-	end
-	if love.mouse.isDown(2) then
-		for i=1,#loadedDragTiles do
-			if loadedDragTiles[i] ~= nil then
-				if loadedDragTiles[i][1] == roundDown(x-xMovement) and loadedDragTiles[i][2] == roundDown(y-yMovement) then
-				  	table.remove(loadedDragTiles, i)
+	if addingCollision == false then
+		if love.mouse.isDown(1) and roundDown(x) > 255 and y > 64 then
+			loadedDragTiles[#loadedDragTiles+1] = {roundDown(x-xMovement), roundDown(y-yMovement), selectedTile[1], selectedTile[2], selectedTile[3]}
+		end
+		if love.mouse.isDown(2) then
+			for i=1,#loadedDragTiles do
+				if loadedDragTiles[i] ~= nil then
+					if loadedDragTiles[i][1] == roundDown(x-xMovement) and loadedDragTiles[i][2] == roundDown(y-yMovement) then
+					  	table.remove(loadedDragTiles, i)
+					end
 				end
 			end
 		end
@@ -65,11 +73,13 @@ function editor.update(dt)
 end
 
 function editor.draw()
-	love.graphics.draw(back, -96, -96)
 
+	love.graphics.draw(grid, 0, 0)
+	love.graphics.setColor(1, 1, 1, 1)
 	if loadedDragTiles ~= nil then 
 		for i=1,#loadedDragTiles do
 		    if loadedDragTiles[i] ~= nil then
+		    	if addingCollision == true then love.graphics.setColor(1, 1, 1, 0.5) end
 				local img = spriteSheets[loadedDragTiles[i][5]]
 				local quad = love.graphics.newQuad(loadedDragTiles[i][3], loadedDragTiles[i][4], 32, 32, img)
 				love.graphics.draw(img, quad, ((xMovement+loadedDragTiles[i][1])*scale)+mouseX, ((yMovement+loadedDragTiles[i][2])*scale)+mouseY, 0, scale, scale) 
@@ -83,12 +93,21 @@ function editor.draw()
         love.graphics.draw(img, quad, 1236, 936, 0, 2, 2) 
     end
     
-    love.graphics.draw(spriteSheets[currentSpriteSheet], 0, 0+spriteSheetScroll)
+    love.graphics.draw(back, 0, 0)
+    love.graphics.draw(spriteSheets[currentSpriteSheet], 2, 2+spriteSheetScroll)
+	love.graphics.draw(buttonsSheet, buttons[1][1], 266, 8)
+	love.graphics.draw(buttonsSheet, buttons[2][1], 304, 8)
+
 end
 
 function editor.mousepressed(x, y, button, istouch) 
     if roundDown(x) < 255 then
         selectedTile = {roundDown(x), roundDown(y-spriteSheetScroll), currentSpriteSheet}
+    end
+    if roundDown(x) > 255 and y < 100 then
+    	if y < 100 then
+    		
+    	end
     end
 end
 
@@ -99,7 +118,7 @@ function editor.keypressed(key, code)
 		xMovement = 0 
 	end
 	if key == "x" then
-		stream = io.open(love.filesystem.getWorkingDirectory().."/projects/"..loadedFile, "w")
+		stream = io.open(love.filesystem.getWorkingDirectory().."/projects/"..loadedFileTiles, "w")
 		for i=1,#loadedDragTiles do
 	        if loadedDragTiles[i] == nil then 
 	        else
@@ -111,20 +130,25 @@ function editor.keypressed(key, code)
 	        end
       	end
       	stream.close()
+      	-- SAVIGN FOR COLLISION MAPPER
+  --     	stream = io.open(love.filesystem.getWorkingDirectory().."/projects/"..loadedFileColli, "w")
+		-- for i=1,#loadedDragTiles do
+	 --        if loadedDragTiles[i] == nil then 
+	 --        else
+	 --          stream:write(loadedDragTiles[i][1], " ") 
+	 --          stream:write(loadedDragTiles[i][2], " ") 
+	 --          stream:write(loadedDragTiles[i][3], " ") 
+	 --          stream:write(loadedDragTiles[i][4], " ") 
+	 --          stream:write(loadedDragTiles[i][5], "\n") 
+	 --        end
+  --     	end
+  --     	stream.close()
 	end
-	if key == "1" then currentSpriteSheet="vegetation" end
-	if key == "2" then currentSpriteSheet="groundtiles" end
-	if key == "3" then currentSpriteSheet="rocks" end
-	if key == "4" then currentSpriteSheet="items" end
-	if key == "5" then currentSpriteSheet="othero" end
-	if key == "6" then currentSpriteSheet="buildings" end
-	if key == "7" then currentSpriteSheet="walls" end
-	if key == "8" then currentSpriteSheet="flooring" end
-	if key == "9" then currentSpriteSheet="stairs" end
-	if key == "0" then currentSpriteSheet="misc" end
-	if key == "i" then currentSpriteSheet="electronics" end
-	if key == "o" then currentSpriteSheet="tables" end 
-	if key == "p" then currentSpriteSheet="otheri" end
+	if key == "c" then
+		print(addingCollision)
+		if addingCollision == false then addingCollision = true 
+		else addingCollision = false end
+	end
 end
 
 function editor.wheelmoved(x, y)
