@@ -20,3 +20,5 @@ Fix by only adding tiles when current tile != old tile where tile was placed
 on save, run file sanitation function to remove duplicates
 sublime potentially has a way to manually but quickly remove duplicates as a quick fix
 to fix opacity errors in runtime - when changing to collision, sanitise the dragTiles list
+
+OLD VERSION SEE: https://github.com/willroy/pokemon3
